@@ -9,9 +9,13 @@
 		"module": "commonjs",
 		"watch": false,
 		"sourceMap": false,
+		"rootDir":"./src",
 		"outDir": "./out",
 		"allowSyntheticDefaultImports": true
 	},
+	"include": [
+			"src/**/*"
+	],
 	"exclude": [
 		"out"
 	]

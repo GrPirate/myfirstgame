@@ -1,11 +1,12 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const webpack = require('webpack')
 
 module.exports = {
   entry: {
-    main: './src/init.ts',
-    vendor: ['pixi.js']
+    main: './debug/main.js'
+    // vendor: ['pixi.js']
   },
   output: {
     filename: '[name].[chunkhash].js',
@@ -39,7 +40,8 @@ module.exports = {
   },
   resolve: {
     alias: {
-      assets: path.resolve(__dirname, './src/assets')
+      $assets: path.resolve(__dirname, './src/assets'),
+      $lib: path.resolve(__dirname, '../lib')
     }
   },
   module: {
@@ -66,7 +68,10 @@ module.exports = {
       },
       {
         test: /\.ts$/,
-        use: 'ts-loader'
+        use: 'ts-loader',
+        exclude: [
+          path.resolve(__dirname ,'node_modules')
+        ]
       }
     ]
   },
@@ -80,6 +85,19 @@ module.exports = {
         from: 'src/assets',
         to: 'assets/',
       }
-    ])
+    ]),
+    new CopyWebpackPlugin([
+      {
+        from: './lib/',
+        to: 'lib/',
+      }
+    ]),
+    new webpack.LoaderOptionsPlugin({
+      options: {
+        resolve: {
+          extensions: ['', '.ts', 'js']
+        }
+      }
+    })
   ],
 }
