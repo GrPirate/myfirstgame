@@ -40,8 +40,8 @@ module.exports = {
   },
   resolve: {
     alias: {
-      $assets: path.resolve(__dirname, './src/assets'),
-      $lib: path.resolve(__dirname, '../lib')
+      $assets: path.resolve(__dirname, './assets'),
+      $lib: path.resolve(__dirname, './lib')
     }
   },
   module: {
@@ -82,7 +82,7 @@ module.exports = {
     }),
     new CopyWebpackPlugin([
       {
-        from: 'src/assets',
+        from: './assets/',
         to: 'assets/',
       }
     ]),
