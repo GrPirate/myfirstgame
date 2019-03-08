@@ -15,6 +15,9 @@ var Bullet = /** @class */ (function (_super) {
     __extends(Bullet, _super);
     function Bullet(id, type, speed, player, place, bulletNums) {
         var _this = _super.call(this, id) || this;
+        // 奇: true, 偶: false
+        _this.isOdd = false;
+        _this.pos = 'left';
         _this.type = type;
         _this.speed = speed;
         _this.player = player;
@@ -24,20 +27,50 @@ var Bullet = /** @class */ (function (_super) {
         return _this;
     }
     Bullet.prototype.init = function () {
-        this.x = this.player.x + this.player.width / 2 - this.bulletNums * this.width / 2 + this.place * this.width;
-        this.y = this.player.y + this.height / 2;
+        this.bulletNums % 2 === 0 ? this.isOdd = false : this.isOdd = true;
+        this.pos = this.getPos(this.place, this.bulletNums);
+        this.centerX = this.player.x + this.player.width / 2;
+        this.bulletWidth = this.bulletNums * this.width;
+        this.maxX = this.centerX - this.bulletWidth / 2 + this.place * this.width;
+        this.x = this.centerX - this.width / 2;
+        this.y = this.player.y - this.height + 20;
     };
     Bullet.prototype.moveUp = function () {
+        if (this.x !== this.maxX) {
+            if (this.pos === 'left') {
+                this.x = this.x - 10;
+                if (this.x < this.maxX)
+                    this.x = this.maxX;
+            }
+            else if (this.pos === 'right') {
+                this.x = this.x + 10;
+                if (this.x > this.maxX)
+                    this.x = this.maxX;
+            }
+        }
         this.y = this.getGlobalPosition().y - this.speed;
         if (this.getGlobalPosition().y + this.height < 0) {
             this.remove();
         }
     };
     Bullet.prototype.remove = function () {
+        clearInterval(this.timeId);
         var index = game.bullets.indexOf(this);
         if (index > -1) {
             game.bullets.splice(index, 1);
         }
+    };
+    Bullet.prototype.getPos = function (place, total) {
+        var pos = 'center';
+        var center = Math.ceil(total / 2);
+        var p = place + 1;
+        if (this.isOdd) {
+            pos = p < center ? 'left' : p > center ? 'right' : 'center';
+        }
+        else {
+            pos = p > center ? 'right' : 'left';
+        }
+        return pos;
     };
     return Bullet;
 }(PIXI.Sprite));
@@ -98,6 +131,7 @@ var game;
 var Game = /** @class */ (function () {
     function Game() {
         this.container = { x: 0, y: 0, width: WIDTH, height: HEIGHT };
+        this.currentTime = 0;
         this.runtime = {
             point_x: 0,
             point_y: 0,
@@ -217,23 +251,29 @@ var Game = /** @class */ (function () {
             _this.runtime.point_x = pointer.x;
             _this.runtime.point_y = pointer.y;
         };
-        if (pointer.isDown) {
+        if (pointer.isDown && !pointer.tapped) {
             var x = pointer.x - this.runtime.point_x;
             var y = pointer.y - this.runtime.point_y;
             this.plane.x += x;
             this.plane.y += y;
             this.runtime.point_x = pointer.x;
             this.runtime.point_y = pointer.y;
+            // 发射子弹
+            this.createBullets(10, 1, 20);
+            // console.log(this.runtime.time)
+            // if (this.currentTime !== this.runtime.time){
+            //   this.createBullets(5, 2, 30)
+            //   this.currentTime = this.runtime.time
+            // }
         }
         // fire bullets
-        this.createBullets(5, 1, 50);
         this.bullets.map(function (v) {
             v.moveUp();
         });
     };
     Game.prototype.createBullets = function (n, type, speed) {
         for (var i = 0; i < n; i++) {
-            var bullet = new Bullet(this.bulletType[type], type, speed, this.plane, i, n);
+            var bullet = new Bullet(this.RES[this.bulletType[type]], type, speed, this.plane, i, n);
             this.gameScene.addChild(bullet);
             this.bullets.push(bullet);
         }

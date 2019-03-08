@@ -14,6 +14,8 @@ class Game {
   // 飞机
   private plane: PIXI.Sprite
 
+  private currentTime: number = 0
+
   public runtime = {
     point_x: 0,
     point_y: 0,
@@ -155,17 +157,23 @@ class Game {
       this.runtime.point_y = pointer.y
     }
 
-    if (pointer.isDown) {
+    if (pointer.isDown && !pointer.tapped) {
       let x = pointer.x - this.runtime.point_x
       let y = pointer.y - this.runtime.point_y
       this.plane.x += x
       this.plane.y += y
       this.runtime.point_x = pointer.x
       this.runtime.point_y = pointer.y
+      // 发射子弹
+      
+      this.createBullets(10, 1, 20)
+      // console.log(this.runtime.time)
+      // if (this.currentTime !== this.runtime.time){
+      //   this.createBullets(5, 2, 30)
+      //   this.currentTime = this.runtime.time
+      // }
     }
-
     // fire bullets
-    this.createBullets(5, 1, 50)
     this.bullets.map(v => {
       v.moveUp()
     })
@@ -173,7 +181,7 @@ class Game {
 
   public createBullets (n, type, speed) {
     for (let i = 0; i< n; i++) {
-      let bullet = new Bullet(this.bulletType[type], type, speed, this.plane, i, n)
+      let bullet = new Bullet(this.RES[this.bulletType[type]], type, speed, this.plane, i, n)
       this.gameScene.addChild(bullet)
       this.bullets.push(bullet)
     }
